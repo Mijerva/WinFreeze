@@ -33,5 +33,6 @@ desktop.ini
 
 # Claude Code — project AI config (not for source control)
 .claude/
-CLAUDE.md
-SETUP_CLION.md
+
+# Documentation and planning (internal only)
+*.md
