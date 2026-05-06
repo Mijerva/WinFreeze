@@ -36,3 +36,8 @@ desktop.ini
 
 # Documentation and planning (internal only)
 *.md
+
+# Tests and CI (internal development infrastructure)
+tests/
+scripts/
+.github/
