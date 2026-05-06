@@ -1,0 +1,11 @@
+#include <windows.h>
+
+int WINAPI wWinMain(
+    _In_     HINSTANCE hInstance,
+    _In_opt_ HINSTANCE hPrevInstance,
+    _In_     LPWSTR    lpCmdLine,
+    _In_     int       nCmdShow)
+{
+    MessageBoxW(nullptr, L"WinFreeze starting...", L"WinFreeze", MB_OK);
+    return 0;
+}
