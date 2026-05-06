@@ -21,6 +21,13 @@ FetchContent_MakeAvailable(nlohmann_json)
 
 add_executable(WinFreeze WIN32
     src/main.cpp
+    src/core/ProcessManager.cpp
+    src/core/ProcessGuard.cpp
+    src/core/ProfileManager.cpp
+    src/core/VmDetector.cpp
+    src/ui/MainWindow.cpp
+    src/ui/ProcessList.cpp
+    src/ui/SettingsDialog.cpp
 )
 
 target_include_directories(WinFreeze PRIVATE
