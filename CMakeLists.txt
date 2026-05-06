@@ -11,6 +11,7 @@ endif()
 
 # Dependencies
 include(FetchContent)
+
 FetchContent_Declare(
     nlohmann_json
     URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz
@@ -19,8 +20,41 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(nlohmann_json)
 
-add_executable(WinFreeze WIN32
-    src/main.cpp
+FetchContent_Declare(
+    Catch2
+    GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+    GIT_TAG v3.4.0
+    GIT_SHALLOW TRUE
+)
+FetchContent_MakeAvailable(Catch2)
+
+# Shared compile settings applied to all WinFreeze targets
+set(WINFREEZE_COMPILE_OPTIONS
+    $<$<CXX_COMPILER_ID:MSVC>:/W4>
+    $<$<CXX_COMPILER_ID:MSVC>:/WX>
+    $<$<CXX_COMPILER_ID:MSVC>:/sdl>
+    $<$<CXX_COMPILER_ID:MSVC>:/GS>
+    $<$<CXX_COMPILER_ID:MSVC>:/guard:cf>
+    $<$<CXX_COMPILER_ID:MSVC>:/external:anglebrackets>
+    $<$<CXX_COMPILER_ID:MSVC>:/external:W0>
+)
+
+set(WINFREEZE_LINK_OPTIONS
+    $<$<CXX_COMPILER_ID:MSVC>:/GUARD:CF>
+)
+
+set(WINFREEZE_COMPILE_DEFINITIONS
+    UNICODE
+    _UNICODE
+    WINVER=0x0A00
+    _WIN32_WINNT=0x0A00
+    NOMINMAX
+    WIN32_LEAN_AND_MEAN
+    WINFREEZE_SAFETY_ASSERTIONS
+)
+
+# Core static library — linked by both WinFreeze and WinFreezeTests
+add_library(WinFreezeCore STATIC
     src/core/ProcessManager.cpp
     src/core/ProcessGuard.cpp
     src/core/ProfileManager.cpp
@@ -30,24 +64,27 @@ add_executable(WinFreeze WIN32
     src/ui/SettingsDialog.cpp
 )
 
-target_include_directories(WinFreeze PRIVATE
+target_include_directories(WinFreezeCore PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-target_compile_definitions(WinFreeze PRIVATE
-    UNICODE
-    _UNICODE
-    WINVER=0x0A00
-    _WIN32_WINNT=0x0A00
-    NOMINMAX
-    WIN32_LEAN_AND_MEAN
-)
+target_compile_definitions(WinFreezeCore PUBLIC ${WINFREEZE_COMPILE_DEFINITIONS})
+target_compile_options(WinFreezeCore PRIVATE ${WINFREEZE_COMPILE_OPTIONS})
+target_link_options(WinFreezeCore INTERFACE ${WINFREEZE_LINK_OPTIONS})
 
-target_compile_options(WinFreeze PRIVATE
-    $<$<CXX_COMPILER_ID:MSVC>:/W4>
-)
-
-target_link_libraries(WinFreeze PRIVATE
+target_link_libraries(WinFreezeCore PUBLIC
     nlohmann_json::nlohmann_json
     psapi
 )
+
+# Main executable
+add_executable(WinFreeze WIN32
+    src/main.cpp
+)
+
+target_compile_options(WinFreeze PRIVATE ${WINFREEZE_COMPILE_OPTIONS})
+target_link_libraries(WinFreeze PRIVATE WinFreezeCore)
+
+# Tests
+enable_testing()
+add_subdirectory(tests)
